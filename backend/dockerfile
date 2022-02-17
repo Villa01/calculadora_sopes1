@@ -1,0 +1,19 @@
+# syntax=docker/dockerfile:1
+
+# Generates the Go environment
+FROM golang:1.16-alpine
+
+WORKDIR /app
+
+COPY src/go.mod ./
+COPY src/go.sum ./
+RUN go mod download
+
+# Copies the source code and compiles it
+COPY src/*.go ./
+
+RUN go build -o /docker-gs-ping
+
+EXPOSE 8080
+
+CMD [ "/docker-gs-ping" ]
