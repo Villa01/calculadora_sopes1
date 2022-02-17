@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -16,19 +17,9 @@ import (
 
 // Database connection
 
-var (
-	usr      = "mongoadmin"
-	pwd      = "secret"
-	host     = "localhost"
-	port     = 27017
-	database = "calculator"
-)
-
 func GetCollection(collection string) *mongo.Collection {
-	uri := fmt.Sprintf("mongodb://%s:%s@%s:%d", usr, pwd, host, port)
-	fmt.Print(uri)
 
-	client, err := mongo.NewClient(options.Client().ApplyURI(uri))
+	client, err := mongo.NewClient(options.Client().ApplyURI(os.Getenv("MONGODB_URI")))
 
 	if err != nil {
 		log.Fatal(err.Error())
@@ -41,7 +32,13 @@ func GetCollection(collection string) *mongo.Collection {
 		log.Fatal(err.Error())
 	}
 
-	return client.Database(database).Collection(collection)
+	err = client.Ping(ctx, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println("Connected to MongoDB")
+
+	return client.Database("calculator").Collection(collection)
 }
 
 func GetAllOperations() []bson.M {
@@ -92,6 +89,11 @@ type Operation struct {
 }
 
 type Operations []Operation
+
+func HomeHandler(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode("Go api running on port: 8080")
+}
 
 func OperationHandler(w http.ResponseWriter, r *http.Request) {
 
@@ -151,16 +153,14 @@ func solveOperation(op1 float64, op2 float64, operation string) float64 {
 	}
 }
 
-func HomeHandler(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusOK)
-}
-
 func main() {
 	r := mux.NewRouter().StrictSlash(true)
 
 	for _, route := range routes {
 		r.Name(route.Name).Methods(route.Method).Path(route.Path).Handler(route.Function)
 	}
+
+	fmt.Printf("Go api running on port: 8080\n")
 
 	log.Fatal(http.ListenAndServe(":8080", r))
 }

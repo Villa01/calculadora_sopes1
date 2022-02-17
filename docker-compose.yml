@@ -1,0 +1,29 @@
+version: "3"
+services:
+  backend:
+    build: 
+      context: ./backend/
+      dockerfile: dockerfile
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    links:
+      - "database:db"
+    environment:
+      MONGODB_URI: "mongodb://mongoadmin:secret@db:27017"
+
+#docker run -e MONGO_INITDB_ROOT_USERNAME=mongoadmin -e MONGO_INITDB_ROOT_PASSWORD=secret -p 27017:27017 mongo
+  database:
+    container_name: database
+    image: mongo:5.0.6-focal
+    ports:
+      - "27017:27017"
+    volumes:
+      - "./database/:/data/db"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=mongoadmin
+      - MONGO_INITDB_ROOT_PASSWORD=secret
+    logging:
+      driver: none
+
+
