@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -43,6 +44,21 @@ func GetCollection(collection string) *mongo.Collection {
 	return client.Database(database).Collection(collection)
 }
 
+func GetAllOperations() []bson.M {
+	cursor, err := collection.Find(ctx, bson.M{})
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var operations []bson.M
+	if err = cursor.All(ctx, &operations); err != nil {
+		log.Fatal(err)
+	}
+
+	return operations
+}
+
 var collection = GetCollection("operations")
 var ctx = context.Background()
 
@@ -57,7 +73,8 @@ type Routes []Route
 
 var routes = Routes{
 	Route{Name: "Index", Method: http.MethodGet, Path: "/", Function: HomeHandler},
-	Route{Name: "doOperation", Method: "POST", Path: "/doOperation", Function: OperationHandler},
+	Route{Name: "doOperation", Method: http.MethodPost, Path: "/doOperation", Function: OperationHandler},
+	Route{Name: "getOperations", Method: http.MethodGet, Path: "/getOperations", Function: GetOperationsHandler},
 }
 
 type OperationRequest struct {
@@ -73,6 +90,8 @@ type Operation struct {
 	Result    float64 `json:"result"`
 	DateTime  string  `json:"datetime"`
 }
+
+type Operations []Operation
 
 func OperationHandler(w http.ResponseWriter, r *http.Request) {
 
@@ -106,6 +125,14 @@ func OperationHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-type", "application/json")
 	json.NewEncoder(w).Encode(newOperation)
 	w.WriteHeader(http.StatusCreated)
+}
+
+func GetOperationsHandler(w http.ResponseWriter, r *http.Request) {
+	operations := GetAllOperations()
+
+	w.Header().Set("Content-type", "application/json")
+	json.NewEncoder(w).Encode(operations)
+	w.WriteHeader(http.StatusOK)
 }
 
 func solveOperation(op1 float64, op2 float64, operation string) float64 {
