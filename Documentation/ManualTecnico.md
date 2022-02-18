@@ -1,17 +1,29 @@
 # Manual Tecnico
-
+## Indice 📚
+- [Arquitectura](#arquitectura)
+- [Base de datos](#modelo)
+- [Frontend](#vista)
+- [Backend](#controlador)
+  
 Calculator es una aplicación web realizada por medio de ReactJS, para el frontend, Go, para el Backend y MongoDB como base de datos. Tambien se utilzó Docker para generar imágenes individuales de cada parte de la aplicación y Docker Compose para la orquestación de los mismos. 
+
+<div id='arquitectura'>
 
 ## Arquitectura
 <img src="./img/arq.png">
 
 La arquitectura consiste en un MVC, donde el frontend, el backend y la base de datos corren en contenedores individuales. 
 
+
+<div id='modelo'>
+
 ### Modelo
 El modelo se implementó por medio de una base de datos en MongoDB versión 5.0.6. La imagen de MongoDB que se utilizó es mongo:5.0.6-focal. Además, se utilizó un volúmen para que los datos persistan. El volúmen lo genera en la carpeta [Database](./../database).
 
 `Puerto: 27017`
 
+
+<div id='vista'>
 ### Vista 
 
 La vista se realizó por medio de la libreria ReactJS en la version 17.0.2. Para la versión de producción se utilizó Nginx como servidor de archivos estáticos. Para los estilos se utilzó [bootstrap](https://getbootstrap.com/) en la versión 5.1.3. 
@@ -54,6 +66,9 @@ frontend:.
     └───setupTests.js
 ```
 En la carpeta [Components](./../frontend/src/Components/) se encuentran los componentes necesarios para la organización de la calculadora. 
+
+
+<div id='controlador'>
 
 ### Controlador
 El backend se implementó en Go con la imagen de docker 1.16-alpine. Para la realización de una API funcional se utilizó [Gorilla Mux](https://github.com/gorilla/mux).
