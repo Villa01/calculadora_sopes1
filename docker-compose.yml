@@ -1,9 +1,7 @@
 version: "3"
 services:
   backend:
-    build: 
-      context: ./backend/
-      dockerfile: dockerfile
+    image: villa01/backend_p1_201900907:latest
     restart: unless-stopped
     ports:
       - "8080:8080"
@@ -23,5 +21,12 @@ services:
     environment:
       - MONGO_INITDB_ROOT_USERNAME=mongoadmin
       - MONGO_INITDB_ROOT_PASSWORD=secret
+
+  frontend:
+    container_name: frontend_calculator
+    image: villa01/frontend_p1_201900907:latest
+    restart: unless-stopped
+    ports:
+      - "80:80"
 
 

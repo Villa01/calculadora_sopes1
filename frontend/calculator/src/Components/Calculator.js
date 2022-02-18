@@ -134,7 +134,6 @@ export const Calculator = () => {
                 >DEL</button>
             </div>
             <CalculatorNumericalPad appendToScreen={appendToScreen} handleEqual={handleEqual} />
-            
         </div>
     )
 }
