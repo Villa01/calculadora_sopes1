@@ -24,6 +24,7 @@ El modelo se implementó por medio de una base de datos en MongoDB versión 5.0.
 
 
 <div id='vista'>
+  
 ### Vista 
 
 La vista se realizó por medio de la libreria ReactJS en la version 17.0.2. Para la versión de producción se utilizó Nginx como servidor de archivos estáticos. Para los estilos se utilzó [bootstrap](https://getbootstrap.com/) en la versión 5.1.3. 
