@@ -9,6 +9,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -77,7 +78,7 @@ var routes = Routes{
 type OperationRequest struct {
 	Operator1 float64 `json:"op1"`
 	Operator2 float64 `json:"op2"`
-	Operation string  `json:"operation"`
+	Operation string  `json:"operator"`
 }
 
 type Operation struct {
@@ -101,11 +102,12 @@ func OperationHandler(w http.ResponseWriter, r *http.Request) {
 	var operationRequest OperationRequest
 	err := json.NewDecoder(r.Body).Decode(&operationRequest)
 	if err != nil {
+		fmt.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Oops! There was an error."))
 		return
 	}
-
+	fmt.Println(operationRequest)
 	result := solveOperation(operationRequest.Operator1, operationRequest.Operator2, operationRequest.Operation)
 
 	newOperation := Operation{
@@ -119,6 +121,7 @@ func OperationHandler(w http.ResponseWriter, r *http.Request) {
 	// Insert to database
 	_, err = collection.InsertOne(ctx, newOperation)
 	if err != nil {
+		fmt.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Oops! There was an error."))
 		return
@@ -130,6 +133,7 @@ func OperationHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetOperationsHandler(w http.ResponseWriter, r *http.Request) {
+
 	operations := GetAllOperations()
 
 	w.Header().Set("Content-type", "application/json")
@@ -154,13 +158,17 @@ func solveOperation(op1 float64, op2 float64, operation string) float64 {
 }
 
 func main() {
-	r := mux.NewRouter().StrictSlash(true)
+	router := mux.NewRouter().StrictSlash(true)
 
 	for _, route := range routes {
-		r.Name(route.Name).Methods(route.Method).Path(route.Path).Handler(route.Function)
+		router.Name(route.Name).Methods(route.Method).Path(route.Path).Handler(route.Function)
 	}
 
-	fmt.Printf("Go api running on port: 8080\n")
+	credentials := handlers.AllowCredentials()
+	methods := handlers.AllowedMethods([]string{"POST", "GET", "OPTIONS"})
+	headers := handlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type"})
+	origins := handlers.AllowedOrigins([]string{"*"})
 
-	log.Fatal(http.ListenAndServe(":8080", r))
+	fmt.Printf("Go api running on port: 8080\n")
+	log.Fatal(http.ListenAndServe(":8080", handlers.CORS(credentials, headers, methods, origins)(router)))
 }

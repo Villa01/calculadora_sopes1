@@ -3,13 +3,15 @@ import React, { useState } from 'react';
 import './Calculator.css';
 import { CalculatorNumericalPad } from './CalculatorNumericalPad';
 
+const baseUrl = 'http://localhost:8080';
+
 export const Calculator = () => {
 
     const [screen, setScreen] = useState('0');
     const [operation, setOperation] = useState({
         op1: '',
         operator: '',
-        op2: ''
+        op2: '',
     })
 
     const appendToScreen = (text) => {
@@ -57,9 +59,7 @@ export const Calculator = () => {
         deleteScreen();
     }
 
-    const handleEqual = () => {
-
-        // TODO: fetch to solve the operation
+    const handleEqual = async() => {
 
         if ( operation.op1 === '') {
             // First operator inserted
@@ -74,14 +74,28 @@ export const Calculator = () => {
                 op2: screen
             });
         }
+        const requestOperation = {...operation};
+
+        requestOperation.op1 = parseFloat(requestOperation.op1);
+        requestOperation.op2 = parseFloat(screen);  
         
-
-        const result = operation.op1 + operation.op2;
-        console.log(operation.op1);
-        console.log(operation.op2);
-        console.log(result);
-
-        setScreen(result);
+        await fetch(`${baseUrl}/doOperation`, {
+            method: 'POST',
+            mode: 'cors',
+            headers: {
+                "Content-Type":"application/json"
+            },
+            body: JSON.stringify(requestOperation)
+        }).then( resp => resp.json())
+        .then( data => {
+            const { result } = data;
+            setScreen(result);
+        }).catch( console.error )
+        setOperation({
+            op1: '',
+            operator: '',
+            op2: '',
+        });
 
     }
 

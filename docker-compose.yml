@@ -12,7 +12,7 @@ services:
     environment:
       MONGODB_URI: "mongodb://mongoadmin:secret@db:27017"
 
-#docker run -e MONGO_INITDB_ROOT_USERNAME=mongoadmin -e MONGO_INITDB_ROOT_PASSWORD=secret -p 27017:27017 mongo
+
   database:
     container_name: database
     image: mongo:5.0.6-focal
@@ -23,7 +23,5 @@ services:
     environment:
       - MONGO_INITDB_ROOT_USERNAME=mongoadmin
       - MONGO_INITDB_ROOT_PASSWORD=secret
-    logging:
-      driver: none
 
 
